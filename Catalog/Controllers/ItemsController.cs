@@ -39,6 +39,7 @@ namespace Catalog.Controllers
             return item.AsDto();
         }
 
+        // POST /items
         [HttpPost]
         public ActionResult<ItemDto> CreateItem(CreateItemDto createItemDto)
         {
@@ -53,6 +54,26 @@ namespace Catalog.Controllers
             _repository.CreateItem(item);
 
             return CreatedAtAction(nameof(GetItem), new { id = item.Id }, item);
+        }
+
+        // PUT /items/{id}
+        [HttpPut("{id}")]
+        public ActionResult UpdateItem(Guid id, UpdateItemDto updateItemDto)
+        {
+            var existingItem = _repository.GetItem(id);
+            if (existingItem is null)
+            {
+                return NotFound();
+            }
+
+            Item updatedItem = existingItem with
+            {
+                Name = updateItemDto.Name,
+                Price = updateItemDto.Price
+            };
+            _repository.UpdateItem(updatedItem);
+
+            return NoContent();
         }
     }
 }
