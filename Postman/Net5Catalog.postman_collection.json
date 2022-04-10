@@ -1,0 +1,56 @@
+{
+	"info": {
+		"_postman_id": "29989d60-faac-41c3-955a-8ec59ad2abe9",
+		"name": "Net5Catalog",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GetItems",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7169/items",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7169",
+					"path": [
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Item",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"tim test\",\r\n    \"price\": 56.78\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7169/items",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7169",
+					"path": [
+						"items"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
