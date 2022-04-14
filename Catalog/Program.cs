@@ -1,5 +1,6 @@
 using Catalog.Repositories;
 using Catalog.Settings;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -9,10 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+var mongoDbSettings = builder.Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
 builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
 {
-    var settings = builder.Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
-    return new MongoClient(settings.ConnectionString);
+    return new MongoClient(mongoDbSettings.ConnectionString);
 });
 builder.Services.AddSingleton<IItemsRepository, MongoDbItemsRepository>();
 
@@ -23,7 +24,11 @@ builder.Services.AddControllers(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+                .AddMongoDb(mongoDbSettings.ConnectionString,
+                            name: "mongodb",
+                            timeout: TimeSpan.FromSeconds(3),
+                            tags: new[] { "ready" });
 
 var app = builder.Build();
 
@@ -45,7 +50,17 @@ app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapHealthChecks("/health");
+    // only include health checks tagged with ready
+    endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
+    {
+        Predicate = (check) => check.Tags.Contains("ready")
+    });
+
+    // exclude all health checks so just check if service is alive
+    endpoints.MapHealthChecks("/health/live", new HealthCheckOptions
+    {
+        Predicate = (_) => false
+    });
 });
 
 app.MapControllers();
