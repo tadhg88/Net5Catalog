@@ -16,3 +16,7 @@ dotnet user-secrets init
 ## add secret
 
 dotnet user-secrets set MongoDbSettings:Password Pass#word1
+
+# health checks repo
+
+https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks
