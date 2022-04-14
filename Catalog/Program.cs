@@ -1,3 +1,5 @@
+using System.Net.Mime;
+using System.Text.Json;
 using Catalog.Repositories;
 using Catalog.Settings;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -53,7 +55,25 @@ app.UseEndpoints(endpoints =>
     // only include health checks tagged with ready
     endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
     {
-        Predicate = (check) => check.Tags.Contains("ready")
+        Predicate = (check) => check.Tags.Contains("ready"),
+        ResponseWriter = async (context, report) =>
+        {
+            var result = JsonSerializer.Serialize(
+                new
+                {
+                    status = report.Status.ToString(),
+                    checks = report.Entries.Select(entry => new
+                    {
+                        name = entry.Key,
+                        status = entry.Value.Status.ToString(),
+                        exception = entry.Value.Exception != null ? entry.Value.Exception.Message : "none",
+                        duration = entry.Value.Duration.ToString()
+                    })
+                }
+            );
+            context.Response.ContentType = MediaTypeNames.Application.Json;
+            await context.Response.WriteAsync(result);
+        }
     });
 
     // exclude all health checks so just check if service is alive
